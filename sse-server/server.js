@@ -10,7 +10,7 @@ app.use(express.urlencoded({extended: false}));
 
 app.get('/status', (request, response) => response.json({clients: clients.length}));
 
-const PORT = 3000;
+const PORT = 5000;
 
 let clients = [];
 let facts = [];
@@ -48,16 +48,45 @@ function eventsHandler(request, response, next) {
 
 app.get('/events', eventsHandler);
 
-function sendEventsToAll(newFact) {
-  clients.forEach(client => client.response.write(`data: ${JSON.stringify(newFact)}\n\n`))
+function sendNewLineToAll(line) {
+  console.log("in sending lines function:")
+  line.type = "new"
+  console.log(line)
+  clients.forEach(client => client.response.write(`data: ${JSON.stringify(line)}\n\n`))
+  console.log(facts)
+}
+
+function adjustLineForAll(line) {
+  line.type = "adj"
+  console.log(line)
+  clients.forEach(client => client.response.write(`data: ${JSON.stringify(line)}\n\n`))
 }
 
 async function addFact(request, response, next) {
+  console.log("adding a fact")
   console.log(request.body)
   const newFact = request.body;
   facts.push(newFact);
   response.json(newFact)
-  return sendEventsToAll(newFact);
+  console.log(facts)
+  return sendNewLineToAll(newFact);
 }
 
 app.post('/fact', addFact);
+
+async function adjustFact(request, response, next) {
+  console.log("adjusting a fact")
+  console.log(request.body)
+  const modFact = request.body; 
+  for ( var i = 0; i < facts.length; i++ ) {
+    if ( facts[i].player == request.body.player ) {
+      facts[i].line = request.body.line
+      break
+    }
+  }
+  response.json(facts[i])
+  console.log(facts)
+  return adjustLineForAll(facts[i])
+}
+
+app.put('/fact', adjustFact);
