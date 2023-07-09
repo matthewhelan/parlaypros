@@ -1,0 +1,63 @@
+Somehow we need to be able to enforce the fact that each line has multiple books that are offering a line on that property. Ideally we do this within server.js. 
+
+We have two ways of going about this: 
+
+First we can structure our line as the following: 
+ {
+  player: 
+  attribute: 
+  lines: [
+    { PrizePicks: 5 }
+    { OddsJam : 6 }
+    ..etc
+  ]
+ }
+
+Our second option is the following: 
+{
+  player: 
+  attribute: 
+  PrizePicks: 5
+  OddsJam: 6
+}
+
+I'm not sure how to evaluate the trade-offs between the two. I understand that as an object we can just tack-on additional attributes to extend the second option. But somehow storing all the lines as an array seems more elegant. Actually now that I think about it the first option is the move. Doing so would let us iterate over all the values as needed. And gives us additional flexibility:
+
+ {
+  player: 
+  attribute: 
+  lines: [
+    { 
+      book: PrizePicks
+      line: 5
+      over: 100
+      under: 100
+    }
+    { 
+      book: OddsJam
+      line: 5
+      over: 100
+      under: 100
+    }
+  ]
+ }
+
+Now that we've made our decision, how do we implement this? I think it would be best to have the primary server enforce the data's structure. 
+
+Incoming data can look like this (from the scrapers): 
+
+{
+  player: 
+  attribute: 
+  line: 
+  {
+    book: PrizePicks
+    line: 
+    over: 
+    under:
+  }
+}
+
+And its the server's responsibility to do the proper book-keeping to generate the data that it sends to the client
+
+But to generate the table, I need to get whichever line has the most props (book-offered-lines) and use that to generate the th's trs. And where we can't get a value in the actual rows we just input a dash

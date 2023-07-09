@@ -2,21 +2,22 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [ facts, setFacts ] = useState([]);
+  const [ props, setProps ] = useState([]);
   const [ listening, setListening ] = useState(false);
+  const [ uniqueBooks, setUniqueBooks ] = useState([]);
 
   const handleFactUpdate = (searchCondition, newValue) => {
-    setFacts((prevFacts) => {
-      const updatedFacts = prevFacts.map((fact) => {
-        if ( searchCondition(fact) ) {
-          return { ...fact, line: newValue };
+    setProps((prevProps) => {
+      const updatedProps = prevProps.map((prop) => {
+        if ( searchCondition(prop) ) {
+          return { ...prop, lines: newValue };
         }
-        return fact
+        return prop
       }); 
 
-      return updatedFacts;
+      return updatedProps;
     })
-  }
+  };
 
   useEffect(() => {
     if (!listening) {
@@ -32,6 +33,8 @@ function App() {
   useEffect(() => {
     const handleEventMessage = (event) => {
       const parsedData = JSON.parse(event.data);
+      console.log("parsedData:")
+      console.log(parsedData)
 
       // lets make some cases here
       // if its a new line then we concat
@@ -39,13 +42,27 @@ function App() {
       // and if we need to adjust a line we just do that
 
       if ( parsedData.type === "adj" ) {
-        handleFactUpdate((fact) => fact.name === parsedData.name, parsedData.line)
-      } else if ( parsedData.type === "new" ) {
-        setFacts((facts) => facts.concat(parsedData));
-      } else {
-        setFacts((facts) => facts.concat(parsedData));
-      }
+        // handleFactUpdate((prop) => prop.player === parsedData.player && prop.attribute === parsedData.attribute, parsedData.lines);
+        console.log("adjusting old")
 
+        setProps((prevProps) => {
+          const updatedProps = prevProps.map((prop) => {
+            if ( parsedData.player === prop.player && 
+                parsedData.attribute === prop.attribute) {
+              return { ...prop, lines: parsedData.lines };
+            }
+            return prop
+          }); 
+          console.log(updatedProps)
+    
+          return updatedProps;
+        })
+      } else if ( parsedData.type === "new" ) {
+        console.log("adding new")
+        setProps((props) => props.concat(parsedData));
+      } else { // the starting case where we are hydrated with data from the server
+        setProps((props) => props.concat(parsedData));
+      }
       
     };
   
@@ -57,7 +74,14 @@ function App() {
     };
   }, []);
 
-  
+  useEffect(() => {
+    const updatedUniqueBooks = Array.from(
+      new Set(
+        props.flatMap((prop) => prop.lines.flatMap((line) => line.book))
+      )
+    );
+    setUniqueBooks(updatedUniqueBooks);
+  }, [props])
 
   return (
     <table className="stats-table">
@@ -65,23 +89,28 @@ function App() {
         <tr>
           <th>Player</th>
           <th>Attribute</th>
-          <th>Book</th>
-          <th>Dummy</th>
-          <th>Line</th>
+          {
+            uniqueBooks.map((book, i) => 
+              <th key={i}>{book}</th>
+            )
+          }
         </tr>
       </thead>
       <tbody>
-        {
-          facts.map((fact, i) =>
-            <tr key={i}>
-              <td>{fact.player}</td>
-              <td>{fact.attribute}</td>
-              <td>{fact.book}</td>
-              <td>{fact.dummy}</td>
-              <td>{fact.line}</td>
-            </tr>
-          )
-        }
+        { props.map((prop, i) => (
+          <tr key={`prop-${i}`}>
+            <td>{prop.player}</td>
+            <td>{prop.attribute}</td>
+            {uniqueBooks.map((book, j) => {
+              const matchingLine = prop.lines.find((line) => line.book === book);
+              return (
+                <td key={`prop-${i}-book-${j}`}>
+                  {matchingLine ? matchingLine.value : '-'}
+                </td>
+              );
+            })}
+          </tr>
+        )) }
       </tbody>
     </table>
   );
