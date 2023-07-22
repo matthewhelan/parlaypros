@@ -88,6 +88,7 @@ function App() {
       <thead>
         <tr>
           <th>Player</th>
+          <th>League</th>
           <th>Attribute</th>
           {
             uniqueBooks.map((book, i) => 
@@ -97,7 +98,7 @@ function App() {
         </tr>
       </thead>
       <tbody>
-        { props.map((prop, i) => (
+        {/* props.map((prop, i) => (
           <tr key={`prop-${i}`}>
             <td>{prop.player}</td>
             <td>{prop.attribute}</td>
@@ -110,10 +111,94 @@ function App() {
               );
             })}
           </tr>
-        )) }
+          )) */}
+        { props.map((prop, index) => (
+          <TableRow key={prop.player + prop.attribute + prop.league} rowData={prop} books={uniqueBooks}/>
+        ))}
       </tbody>
     </table>
   );
 }
+
+const TableRow = ({ rowData, books }) => {
+  const [rowClass, setRowClass] = useState("");
+  const [prevRowData, setPrevRowData] = useState(rowData);
+
+  const animateChanges = () => {
+    if ( rowClass === "" ) {
+      setRowClass("newRow")
+      setTimeout(() => {
+        setRowClass("standardRow");
+      }, 2000);
+    } else if ( rowClass === "standardRow" ) {
+      // case that we're changing a line
+      // we need to figure out which line we're changing 
+      // and how its moving
+
+    }
+  };
+
+  const animateLineChanges = () => {
+    rowData.lines.forEach((line, index) => {
+      if ( line.value ) {
+        const prevValue = prevRowData.lines[index].value;
+        if (line.value !== prevValue) {
+          // Apply animation class to the corresponding cell when the value changes
+
+          const cellElement = document.getElementById(`prop-${rowData.player}-book-${index}`);
+          if (cellElement) {
+            if ( prevValue === "-" ) {
+              cellElement.classList.add('new-cell-animation');
+              setTimeout(() => {
+                cellElement.classList.remove('new-cell-animation');
+              }, 1000); // Adjust this time to match the transition duration in the CSS
+    
+            } else if ( Number(line.value) > Number(prevValue) ) {
+              cellElement.classList.add('increase-cell-animation');
+              setTimeout(() => {
+                cellElement.classList.remove('increase-cell-animation');
+              }, 1000); // Adjust this time to match the transition duration in the CSS
+    
+    
+            } else if ( Number(line.value) < Number(prevValue) ) {
+              cellElement.classList.add('decrease-cell-animation');
+              setTimeout(() => {
+                cellElement.classList.remove('decrease-cell-animation');
+              }, 1000); // Adjust this time to match the transition duration in the CSS
+    
+            }
+          }
+          
+        }
+      }
+      
+    });
+  };
+
+  useEffect(() => {
+    animateLineChanges();
+    setPrevRowData(rowData);
+  }, [rowData, books]);
+
+  useEffect(() => {
+    animateChanges();
+  }, [rowData, books]);
+
+  return (
+    <tr className={rowClass}>
+      <td>{rowData.player}</td>
+      <td>{rowData.league}</td>
+      <td>{rowData.attribute}</td>
+      {books.map((book, j) => {
+        const matchingLine = rowData.lines.find((line) => line.book === book);
+        return (
+          <td key={`prop-${rowData.player}-book-${j}`} id={`prop-${rowData.player}-book-${j}`}>
+            {matchingLine ? matchingLine.value : '-'}
+          </td>
+        );
+      })}
+    </tr>
+  );
+};
 
 export default App;

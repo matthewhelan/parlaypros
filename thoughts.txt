@@ -61,3 +61,12 @@ Incoming data can look like this (from the scrapers):
 And its the server's responsibility to do the proper book-keeping to generate the data that it sends to the client
 
 But to generate the table, I need to get whichever line has the most props (book-offered-lines) and use that to generate the th's trs. And where we can't get a value in the actual rows we just input a dash
+
+
+We have a couple cases that we need to handle when looking at updated lines and stuff. 
+The first case is that the line exists in current lines but not in prevLines
+  In this case we need an animation for a new line
+The next case is that we have an old line that is being adjusted
+  In this case we need an animation that shows the number changing (and eventually line movement)
+The final case is when a line exists in old but not in new
+  in this case we have to show the deletion of said line

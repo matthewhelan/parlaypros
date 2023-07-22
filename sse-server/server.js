@@ -20,8 +20,9 @@ app.listen(PORT, () => {
 })
 
 // defining a line object in the javascript way: 
-function prop(player, attribute, line) {
+function prop(player, league, attribute, line) {
   this.player = player; 
+  this.league = league;
   this.attribute = attribute; 
   this.lines = [line]
   this.type = "";
@@ -131,7 +132,7 @@ async function addFact(request, response, next) {
   }
 
   if ( i == propArray.length ) {
-    newProp = new prop(incomingProp.player, incomingProp.attribute, incomingProp.line)
+    newProp = new prop(incomingProp.player, incomingProp.league, incomingProp.attribute, incomingProp.line)
     propArray.push(newProp);
     response.json(newProp);
     sendNewLineToAll(newProp);
