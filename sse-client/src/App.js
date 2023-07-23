@@ -3,8 +3,15 @@ import './App.css';
 
 function App() {
   const [ props, setProps ] = useState([]);
+  const [ filteredProps, setFilteredProps ] = useState([]);
   const [ listening, setListening ] = useState(false);
   const [ uniqueBooks, setUniqueBooks ] = useState([]);
+  const [ uniquePlayerNames, setUniquePlayerNames ] = useState([]);
+  const [ uniqueLeagues, setUniqueLeagues ] = useState([]);
+  const [ uniqueAttributes, setUniqueAttributes ] = useState([]);
+  const [ playerFilterValue, setPlayerFilter ] = useState("");
+  const [ leagueFilterValue, setLeagueFilter ] = useState("");
+  const [ attributeFilterValue, setAttributeFilter ] = useState("");
 
   const handleFactUpdate = (searchCondition, newValue) => {
     setProps((prevProps) => {
@@ -81,9 +88,85 @@ function App() {
       )
     );
     setUniqueBooks(updatedUniqueBooks);
+
+    const updatedUniquePlayerNames = Array.from(
+      new Set(
+        props.flatMap((prop) => prop.player)
+      )
+    )
+    setUniquePlayerNames(updatedUniquePlayerNames)
+
+    const updatedAttributes = Array.from(
+      new Set(
+        props.flatMap((prop) => prop.attribute)
+      )
+    )
+    setUniqueAttributes(updatedAttributes)
+
+    const updatedLeagues = Array.from(
+      new Set(
+        props.flatMap((prop) => prop.league)
+      )
+    )
+    setUniqueLeagues(updatedLeagues)
+
   }, [props])
 
+  useEffect(() => {
+    setFilteredProps(props.filter((prop) => 
+      (playerFilterValue === "" || playerFilterValue === prop.player) &&
+      (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
+      (attributeFilterValue === "" || attributeFilterValue === prop.attribute)
+    ))
+  }, [props, playerFilterValue, leagueFilterValue, attributeFilterValue])
+
+  const applyPlayerFilter = (event) => {
+    const selectedPlayer = document.getElementById('playerFilter').value;
+    setPlayerFilter(selectedPlayer);
+  };
+
+  const applyLeagueFilter = (event) => {
+    const selectedLeague = document.getElementById('leagueFilter').value;
+    setLeagueFilter(selectedLeague);
+  };
+
+  const applyAttributeFilter = (event) => {
+    const selectedAttribute = document.getElementById('attributeFilter').value;
+    setAttributeFilter(selectedAttribute);
+  };
+
   return (
+    <div>
+    <label for="playerFilter">Filter by Player:</label>
+    <select id="playerFilter" onChange={applyPlayerFilter}>
+      <option value="">Select Player</option>
+      {
+        uniquePlayerNames.map((playerName, i) => (
+          <option key={i} value={playerName}>{playerName}</option>
+        ))
+      }
+    </select>
+
+    <label for="leagueFilter">Filter by League:</label>
+    <select id="leagueFilter" onChange={applyLeagueFilter}>
+      <option value="">Select League</option>
+      {
+        uniqueLeagues.map((league, i) => (
+          <option key={i} value={league}>{league}</option>
+        ))
+      }
+    </select>
+
+    <label for="attributeFilter">Filter by Attribute:</label>
+    <select id="attributeFilter" onChange={applyAttributeFilter}>
+      <option value="">Select Attribute</option>
+      {
+        uniqueAttributes.map((attribute, i) => (
+          <option key={i} value={attribute}>{attribute}</option>
+        ))
+      }
+    </select>
+
     <table className="stats-table">
       <thead>
         <tr>
@@ -112,11 +195,12 @@ function App() {
             })}
           </tr>
           )) */}
-        { props.map((prop, index) => (
+        { filteredProps.map((prop, index) => (
           <TableRow key={prop.player + prop.attribute + prop.league} rowData={prop} books={uniqueBooks}/>
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 
