@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [ props, setProps ] = useState([]);
+  // okay so we're going to have a propArray that is recalculated
+  // everytime the propMap is re-computed
+  const [ propArray, setPropArray ] = useState([]);
+  const [ propMap, setPropMap ] = useState(new Map());
   const [ filteredProps, setFilteredProps ] = useState([]);
   const [ listening, setListening ] = useState(false);
   const [ uniqueBooks, setUniqueBooks ] = useState([]);
@@ -12,19 +15,6 @@ function App() {
   const [ playerFilterValue, setPlayerFilter ] = useState("");
   const [ leagueFilterValue, setLeagueFilter ] = useState("");
   const [ attributeFilterValue, setAttributeFilter ] = useState("");
-
-  const handleFactUpdate = (searchCondition, newValue) => {
-    setProps((prevProps) => {
-      const updatedProps = prevProps.map((prop) => {
-        if ( searchCondition(prop) ) {
-          return { ...prop, lines: newValue };
-        }
-        return prop
-      }); 
-
-      return updatedProps;
-    })
-  };
 
   useEffect(() => {
     if (!listening) {
@@ -37,39 +27,52 @@ function App() {
     }
   }, [listening]);
   
+
+  function reviver(key, value) {
+    if(typeof value === 'object' && value !== null) {
+      if (value.dataType === 'Map') {
+        return new Map(value.value);
+      }
+    }
+    return value;
+  }
+
+  useEffect(() => {
+    console.log("detected a change in the propMap old propArray:")
+    console.log(propArray)
+    setPropArray(() => {
+      return Array.from(propMap.values())})
+    console.log("made changes to propArray")
+    console.log(propArray)
+  }, [propMap]);
+
   useEffect(() => {
     const handleEventMessage = (event) => {
-      const parsedData = JSON.parse(event.data);
-      console.log("parsedData:")
-      console.log(parsedData)
-
+      const parsedData = JSON.parse(event.data, reviver);
       // lets make some cases here
       // if its a new line then we concat
       // if we need to drop a line then we remove
       // and if we need to adjust a line we just do that
+      console.log("parsedData here:")
+      console.log(parsedData)
 
-      if ( parsedData.type === "adj" ) {
-        // handleFactUpdate((prop) => prop.player === parsedData.player && prop.attribute === parsedData.attribute, parsedData.lines);
-        console.log("adjusting old")
+      if ( (parsedData instanceof Map) ) { // starting case where we are hydrated by data from the server
+        console.log("hydrating");
+        setPropMap(parsedData)
+      } else if ( parsedData.type === "adjust" || parsedData.type === "new" ) {
+        console.log("adjusting or new");
+        const changeMap = propMap
+        changeMap.set(parsedData.key, parsedData.prop)
+        setPropMap(new Map(changeMap));
+        
+      } else if ( parsedData.type === "delete" ) {
+        const changeMap = propMap
+        changeMap.delete(parsedData.key)
+        setPropMap(new Map(changeMap));
+      } 
 
-        setProps((prevProps) => {
-          const updatedProps = prevProps.map((prop) => {
-            if ( parsedData.player === prop.player && 
-                parsedData.attribute === prop.attribute) {
-              return { ...prop, lines: parsedData.lines };
-            }
-            return prop
-          }); 
-          console.log(updatedProps)
-    
-          return updatedProps;
-        })
-      } else if ( parsedData.type === "new" ) {
-        console.log("adding new")
-        setProps((props) => props.concat(parsedData));
-      } else { // the starting case where we are hydrated with data from the server
-        setProps((props) => props.concat(parsedData));
-      }
+      console.log("showing map: ")
+      console.log(propMap)
       
     };
   
@@ -84,41 +87,41 @@ function App() {
   useEffect(() => {
     const updatedUniqueBooks = Array.from(
       new Set(
-        props.flatMap((prop) => prop.lines.flatMap((line) => line.book))
+        propArray.flatMap((prop) => prop.lines.flatMap((line) => line.book))
       )
     );
     setUniqueBooks(updatedUniqueBooks);
 
     const updatedUniquePlayerNames = Array.from(
       new Set(
-        props.flatMap((prop) => prop.player)
+        propArray.flatMap((prop) => prop.player)
       )
     )
     setUniquePlayerNames(updatedUniquePlayerNames)
 
     const updatedAttributes = Array.from(
       new Set(
-        props.flatMap((prop) => prop.attribute)
+        propArray.flatMap((prop) => prop.attribute)
       )
     )
     setUniqueAttributes(updatedAttributes)
 
     const updatedLeagues = Array.from(
       new Set(
-        props.flatMap((prop) => prop.league)
+        propArray.flatMap((prop) => prop.league)
       )
     )
     setUniqueLeagues(updatedLeagues)
 
-  }, [props])
+  }, [propArray])
 
   useEffect(() => {
-    setFilteredProps(props.filter((prop) => 
+    setFilteredProps(propArray.filter((prop) => 
       (playerFilterValue === "" || playerFilterValue === prop.player) &&
       (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
       (attributeFilterValue === "" || attributeFilterValue === prop.attribute)
     ))
-  }, [props, playerFilterValue, leagueFilterValue, attributeFilterValue])
+  }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue])
 
   const applyPlayerFilter = (event) => {
     const selectedPlayer = document.getElementById('playerFilter').value;
