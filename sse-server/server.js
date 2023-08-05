@@ -166,7 +166,6 @@ async function addFact(request, response, next) {
   if ( propMap.has(incomingProp.player + incomingProp.attribute + incomingProp.league) ) {
     propMap.get(incomingProp.player + incomingProp.attribute + incomingProp.league).addBookLine
     (incomingProp.line);
-    console.log(propMap.get(incomingProp.player + incomingProp.attribute + incomingProp.league))
     response.json(
       new keyPropResponse(
         incomingProp.player + incomingProp.attribute + incomingProp.league, 
@@ -179,7 +178,6 @@ async function addFact(request, response, next) {
 
   } else { // for now lets just assume that the input is properly formed
     propMap.set(incomingProp.player + incomingProp.attribute + incomingProp.league, new prop(incomingProp.player, incomingProp.league, incomingProp.attribute, incomingProp.line));
-    console.log(propMap.get(incomingProp.player + incomingProp.attribute + incomingProp.league))
     response.json(
       new keyPropResponse(
         incomingProp.player + incomingProp.attribute + incomingProp.league, 

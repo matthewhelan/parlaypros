@@ -38,12 +38,8 @@ function App() {
   }
 
   useEffect(() => {
-    console.log("detected a change in the propMap old propArray:")
-    console.log(propArray)
     setPropArray(() => {
       return Array.from(propMap.values())})
-    console.log("made changes to propArray")
-    console.log(propArray)
   }, [propMap]);
 
   useEffect(() => {
@@ -53,14 +49,10 @@ function App() {
       // if its a new line then we concat
       // if we need to drop a line then we remove
       // and if we need to adjust a line we just do that
-      console.log("parsedData here:")
-      console.log(parsedData)
 
       if ( (parsedData instanceof Map) ) { // starting case where we are hydrated by data from the server
-        console.log("hydrating");
         setPropMap(parsedData)
       } else if ( parsedData.type === "adjust" || parsedData.type === "new" ) {
-        console.log("adjusting or new");
         const changeMap = propMap
         changeMap.set(parsedData.key, parsedData.prop)
         setPropMap(new Map(changeMap));
@@ -70,9 +62,6 @@ function App() {
         changeMap.delete(parsedData.key)
         setPropMap(new Map(changeMap));
       } 
-
-      console.log("showing map: ")
-      console.log(propMap)
       
     };
   
