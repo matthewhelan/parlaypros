@@ -339,10 +339,10 @@ const TableRow = ({ rowData, books }) => {
     }
 
     if ( over ) {
-      setHitOdds("%" + String(odds.toFixed(4) * 100));
+      setHitOdds("%" + String((odds * 100).toFixed(2)));
       setOverOrUnder("OVER")
     } else {
-      setHitOdds("%" + String(odds.toFixed(4) * 100));
+      setHitOdds("%" + String((odds  * 100).toFixed(2)));
       setOverOrUnder("UNDER")
     }
 
