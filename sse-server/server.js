@@ -54,7 +54,7 @@ function prop(player, league, attribute, game, line) {
     const expectedValueSum = this.lines.reduce((accumulator, line) => 
       accumulator + parseFloat(line.expectedValue), 0)
 
-    this.impliedLine = expectedValueSum / this.lines.length;
+    this.impliedLine = (expectedValueSum / this.lines.length).toFixed(2);
   }
 
 }
