@@ -83,26 +83,38 @@ function App() {
 
     const updatedUniquePlayerNames = Array.from(
       new Set(
-        propArray.flatMap((prop) => prop.player)
+        filteredProps.filter((prop) => 
+          (playerFilterValue === "" || playerFilterValue === prop.player) &&
+          (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
+          (attributeFilterValue === "" || attributeFilterValue === prop.attribute)
+        ).flatMap((prop) => prop.player)
       )
     )
     setUniquePlayerNames(updatedUniquePlayerNames)
 
     const updatedAttributes = Array.from(
       new Set(
-        propArray.flatMap((prop) => prop.attribute)
+        filteredProps.filter((prop) => 
+          (playerFilterValue === "" || playerFilterValue === prop.player) &&
+          (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
+          (attributeFilterValue === "" || attributeFilterValue === prop.attribute)
+        ).flatMap((prop) => prop.attribute)
       )
     )
     setUniqueAttributes(updatedAttributes)
 
     const updatedLeagues = Array.from(
       new Set(
-        propArray.flatMap((prop) => prop.league)
+        filteredProps.filter((prop) => 
+          (playerFilterValue === "" || playerFilterValue === prop.player) &&
+          (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
+          (attributeFilterValue === "" || attributeFilterValue === prop.attribute)
+        ).flatMap((prop) => prop.league)
       )
     )
     setUniqueLeagues(updatedLeagues)
 
-  }, [propArray])
+  }, [filteredProps, playerFilterValue, leagueFilterValue, attributeFilterValue])
 
   useEffect(() => {
     setFilteredProps(propArray.filter((prop) => 
@@ -129,35 +141,37 @@ function App() {
 
   return (
     <div>
-    <label for="playerFilter">Filter by Player:</label>
-    <select id="playerFilter" onChange={applyPlayerFilter}>
-      <option value="">Select Player</option>
-      {
-        uniquePlayerNames.map((playerName, i) => (
-          <option key={i} value={playerName}>{playerName}</option>
-        ))
-      }
-    </select>
+    <div> 
+      <label for="playerFilter">Filter by Player:</label>
+      <select value={playerFilterValue} id="playerFilter" onChange={applyPlayerFilter}>
+        <option value="">Select Player</option>
+        {
+          uniquePlayerNames.map((playerName, i) => (
+            <option key={i} value={playerName}>{playerName}</option>
+          ))
+        }
+      </select>
 
-    <label for="leagueFilter">Filter by League:</label>
-    <select id="leagueFilter" onChange={applyLeagueFilter}>
-      <option value="">Select League</option>
-      {
-        uniqueLeagues.map((league, i) => (
-          <option key={i} value={league}>{league}</option>
-        ))
-      }
-    </select>
+      <label for="leagueFilter">Filter by League:</label>
+      <select value={leagueFilterValue} id="leagueFilter" onChange={applyLeagueFilter}>
+        <option value="">Select League</option>
+        {
+          uniqueLeagues.map((league, i) => (
+            <option key={i} value={league}>{league}</option>
+          ))
+        }
+      </select>
 
-    <label for="attributeFilter">Filter by Attribute:</label>
-    <select id="attributeFilter" onChange={applyAttributeFilter}>
-      <option value="">Select Attribute</option>
-      {
-        uniqueAttributes.map((attribute, i) => (
-          <option key={i} value={attribute}>{attribute}</option>
-        ))
-      }
-    </select>
+      <label for="attributeFilter">Filter by Attribute:</label>
+      <select value={attributeFilterValue} id="attributeFilter" onChange={applyAttributeFilter}>
+        <option value="">Select Attribute</option>
+        {
+          uniqueAttributes.map((attribute, i) => (
+            <option key={i} value={attribute}>{attribute}</option>
+          ))
+        }
+      </select>
+    </div>
 
     <table className="stats-table">
       <thead>
@@ -165,6 +179,7 @@ function App() {
           <th>Player</th>
           <th>League</th>
           <th>Attribute</th>
+          <th>Game</th>
           {
             uniqueBooks.map((book, i) => 
               <th key={i}>{book}</th>
@@ -173,20 +188,6 @@ function App() {
         </tr>
       </thead>
       <tbody>
-        {/* props.map((prop, i) => (
-          <tr key={`prop-${i}`}>
-            <td>{prop.player}</td>
-            <td>{prop.attribute}</td>
-            {uniqueBooks.map((book, j) => {
-              const matchingLine = prop.lines.find((line) => line.book === book);
-              return (
-                <td key={`prop-${i}-book-${j}`}>
-                  {matchingLine ? matchingLine.value : '-'}
-                </td>
-              );
-            })}
-          </tr>
-          )) */}
         { filteredProps.map((prop, index) => (
           <TableRow key={prop.player + prop.attribute + prop.league} rowData={prop} books={uniqueBooks}/>
         ))}
@@ -263,11 +264,13 @@ const TableRow = ({ rowData, books }) => {
       <td>{rowData.player}</td>
       <td>{rowData.league}</td>
       <td>{rowData.attribute}</td>
+      <td>{rowData.game}</td>
       {books.map((book, j) => {
         const matchingLine = rowData.lines.find((line) => line.book === book);
         return (
           <td key={`prop-${rowData.player}-${rowData.league}-${rowData.attribute}-book-${book}`} id={`prop-${rowData.player}-${rowData.league}-${rowData.attribute}-book-${book}`}>
             {matchingLine ? matchingLine.value : '-'}
+            <sup>{matchingLine ? matchingLine.over : '-'}</sup>&frasl;<sub>{matchingLine ? matchingLine.under : '-'}</sub>
             <sup>{matchingLine ? matchingLine.over : '-'}</sup>&frasl;<sub>{matchingLine ? matchingLine.under : '-'}</sub>
           </td>
         );

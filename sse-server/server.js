@@ -21,10 +21,11 @@ app.listen(PORT, () => {
 })
 
 // defining a line object in the javascript way: 
-function prop(player, league, attribute, line) {
+function prop(player, league, attribute, game, line) {
   this.player = player; 
   this.league = league;
   this.attribute = attribute; 
+  this.game = game; 
   this.lines = [line]
   this.type = "";
 
@@ -43,17 +44,6 @@ function prop(player, league, attribute, line) {
   function addBookLine(bookLine) {
     this.lines = this.lines.concat(bookLine);
   }
-
-  this.modBookLine=modBookLine; 
-  function modBookLine(bookLine) {
-      this.lines = this.lines.map((line) => {
-          if ( line.book === bookLine.book ) {
-              return { ...bookLine };
-          }
-          return line
-      });
-  }
-
 }
 
 function keyPropResponse(key, prop, response, reason) {
@@ -163,60 +153,37 @@ async function addFact(request, response, next) {
 
   // should probably have differentiated responses depending on whether we're adding to a line
   // or if we created a new line
-  if ( propMap.has(incomingProp.player + incomingProp.attribute + incomingProp.league) ) {
-    propMap.get(incomingProp.player + incomingProp.attribute + incomingProp.league).addBookLine
+  const propMapKey = incomingProp.player + incomingProp.attribute + incomingProp.league;
+
+  if ( propMap.has(propMapKey) ) {
+    propMap.get(propMapKey).addBookLine
     (incomingProp.line);
     response.json(
       new keyPropResponse(
-        incomingProp.player + incomingProp.attribute + incomingProp.league, 
-        propMap.get(incomingProp.player + incomingProp.attribute + incomingProp.league), 
+        propMapKey, 
+        propMap.get(propMapKey), 
         "Success", 
         "New Line Created"
       )
     );
-    sendNewLineToAll(incomingProp.player + incomingProp.attribute + incomingProp.league)
+    sendNewLineToAll(propMapKey)
 
   } else { // for now lets just assume that the input is properly formed
-    propMap.set(incomingProp.player + incomingProp.attribute + incomingProp.league, new prop(incomingProp.player, incomingProp.league, incomingProp.attribute, incomingProp.line));
+    propMap.set(propMapKey, new prop(incomingProp.player, incomingProp.league, incomingProp.attribute, incomingProp.game, incomingProp.line));
     response.json(
       new keyPropResponse(
-        incomingProp.player + incomingProp.attribute + incomingProp.league, 
-        propMap.get(incomingProp.player + incomingProp.attribute + incomingProp.league),
+        propMapKey, 
+        propMap.get(propMapKey),
         "Success",
         "New Line Added"
       )
     );
-    sendNewLineToAll(incomingProp.player + incomingProp.attribute + incomingProp.league)
+    sendNewLineToAll(propMapKey)
 
   }
 
   return 
 
-  // // lets iterate through all the jaunts and see if there is a player prop for us to add to
-  // var i = 0; 
-  // for ( ; i < propArray.length; i++ ) {
-  //   if ( propArray[i].player == incomingProp.player && 
-  //       propArray[i].attribute == incomingProp.attribute ) {
-  //         console.log("printing in goofy ahh")
-  //         console.log("incoming:")
-  //         console.log(incomingProp)
-  //         console.log("current prop:")
-  //         console.log(propArray[i])
-  //         propArray[i].addBookLine(incomingProp.line); 
-  //         response.json(propArray[i])
-  //         adjustLineForAll(newProp)
-  //         break
-  //   }
-  // }
-
-  // if ( i == propArray.length ) {
-  //   newProp = new prop(incomingProp.player, incomingProp.league, incomingProp.attribute, incomingProp.line)
-  //   propArray.push(newProp);
-  //   response.json(newProp);
-  //   sendNewLineToAll(newProp);
-  // }
-
-  // return
 }
 app.post('/fact', addFact);
 
@@ -224,33 +191,22 @@ async function adjustFact(request, response, next) {
   console.log("adjusting a fact")
   console.log(request.body)
   const modLine = request.body; 
-  // var i = 0;
-  // for (; i < propArray.length; i++ ) {
-  //   if ( propArray[i].player == modLine.player &&
-  //       propArray[i].attribute == modLine.attribute) {
-      
-  //     for ( var j = 0; j < propArray[i].lines.length; j++ ) {
-  //       propArray[i].lines[j] = modLine.line
-  //       response.json(propArray[i])
-  //       adjustLineForAll(propArray[i])
-  //       break
-  //     }      
-  //   }
-  // }
+  
+  const propMapKey = incomingProp.player + incomingProp.attribute + incomingProp.league;
 
-  if ( propMap.has(modLine.player + modLine.attribute + modLine.league) ) {
-    for ( var j = 0; j < propMap.get(modLine.player + modLine.attribute + modLine.league).lines.length; j++ ) {
-      if ( propMap.get(modLine.player + modLine.attribute + modLine.league).lines[j].book === modLine.line.book ) {
-        propMap.get(modLine.player + modLine.attribute + modLine.league).lines[j] = modLine.line;
+  if ( propMap.has(propMapKey) ) {
+    for ( var j = 0; j < propMap.get(propMapKey).lines.length; j++ ) {
+      if ( propMap.get(propMapKey).lines[j].book === modLine.line.book ) {
+        propMap.get(propMapKey).lines[j] = modLine.line;
         response.json(
           new keyPropResponse(
-            modLine.player + modLine.attribute + modLine.league, 
-            propMap.get(modLine.player + modLine.attribute + modLine.league),
+            propMapKey, 
+            propMap.get(propMapKey),
             "Success",
             "The prop for the line you were trying to add was found and modified."
           )
         );
-        adjustLineForAll(modLine.player + modLine.attribute + modLine.league);
+        adjustLineForAll(propMapKey);
         break;
       }
 
@@ -259,7 +215,7 @@ async function adjustFact(request, response, next) {
   } else {
     response.json(
       new keyPropResponse(
-        modLine.player + modLine.attribute + modLine.league, 
+        propMapKey, 
         "",
         "Failure",
         "The prop for the line you were trying to add was not found. Try adding the line first instead?"
