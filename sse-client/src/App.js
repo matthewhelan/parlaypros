@@ -208,6 +208,7 @@ function App() {
           <th>League</th>
           <th>Attribute</th>
           <th>Game</th>
+          <th>Avg Line</th>
           {
             uniqueBooks.map((book, i) => 
               <th key={i}>{book}</th>
@@ -293,6 +294,7 @@ const TableRow = ({ rowData, books }) => {
       <td>{rowData.league}</td>
       <td>{rowData.attribute}</td>
       <td>{rowData.game}</td>
+      <td>{rowData.impliedLine}</td>
       {books.map((book, j) => {
         const matchingLine = rowData.lines.find((line) => line.book === book);
         return (

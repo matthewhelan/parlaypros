@@ -26,16 +26,18 @@ function prop(player, league, attribute, game, line) {
   this.league = league;
   this.attribute = attribute; 
   this.game = game; 
+  this.impliedLine = line.expectedValue
   this.lines = [line]
   this.type = "";
 
   this.deleteBookLine=deleteBookLine;
-  function deleteBookLine(bookLine) {
+  function deleteBookLine(book) {
     this.lines = this.lines.filter((line) => {
-        if ( line.book !== bookLine.book ) {
-            return line;
+        if ( line.book !== book ) {
+          return line;
         }
     });
+    this.computeExpectedLine()
     // have to clean up object if it has no new lines
     return;
   }
@@ -43,7 +45,18 @@ function prop(player, league, attribute, game, line) {
   this.addBookLine=addBookLine; 
   function addBookLine(bookLine) {
     this.lines = this.lines.concat(bookLine);
+    this.computeExpectedLine();
+    return;
   }
+
+  this.computeExpectedLine=computeExpectedLine;
+  function computeExpectedLine() {
+    const expectedValueSum = this.lines.reduce((accumulator, line) => 
+      accumulator + parseFloat(line.expectedValue), 0)
+
+    this.impliedLine = expectedValueSum / this.lines.length;
+  }
+
 }
 
 function keyPropResponse(key, prop, response, reason) {
@@ -156,8 +169,7 @@ async function addFact(request, response, next) {
   const propMapKey = incomingProp.player + incomingProp.attribute + incomingProp.league;
 
   if ( propMap.has(propMapKey) ) {
-    propMap.get(propMapKey).addBookLine
-    (incomingProp.line);
+    propMap.get(propMapKey).addBookLine(incomingProp.line);
     response.json(
       new keyPropResponse(
         propMapKey, 
@@ -235,9 +247,7 @@ async function delFact(request, response, next) {
 
   if ( propMap.has(delRequest.key) ) {
     let numberOfLines = propMap.get(delRequest.key).lines.length;
-    propMap.get(delRequest.key).lines = propMap.get(delRequest.key).lines.filter(function(line) {
-      return line.book !== delRequest.book;
-    })
+    propMap.get(delRequest.key).deleteBookLine(delRequest.book)
 
     if ( numberOfLines === propMap.get(delRequest.key).lines.length ) {
       response.json(
