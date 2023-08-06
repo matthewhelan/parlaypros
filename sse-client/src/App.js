@@ -237,6 +237,7 @@ function App() {
           <th>Attribute</th>
           <th>Game</th>
           <th>Avg Line</th>
+          <th>O/U</th>
           <th>Odds To Hit</th>
           {
             uniqueBooks.map((book, i) => 
@@ -261,6 +262,7 @@ const TableRow = ({ rowData, books }) => {
   const [rowClass, setRowClass] = useState("");
   const [prevRowData, setPrevRowData] = useState(rowData);
   const [hitOdds, setHitOdds] = useState("");
+  const [overOrUnder, setOverOrUnder] = useState("");
 
   const animateChanges = () => {
     if ( rowClass === "" ) {
@@ -314,7 +316,12 @@ const TableRow = ({ rowData, books }) => {
   const favorableSideOdds = () => {
     const fImpliedLine = parseFloat(rowData.impliedLine);
     const matchingLine = rowData.lines.find((line) => line.book === books[0]);
-    const fpBookLine = parseFloat(matchingLine.line);
+    if ( typeof matchingLine === 'undefined' ) {
+      return;
+    }
+    const fpBookLine = parseFloat(matchingLine.value);
+
+    
 
     let odds = 0.0;
     let over = true;
@@ -330,9 +337,11 @@ const TableRow = ({ rowData, books }) => {
     }
 
     if ( over ) {
-      setHitOdds("O" + String(odds));
+      setHitOdds(String(odds.toFixed(2)));
+      setOverOrUnder("OVER")
     } else {
-      setHitOdds("U" + String(odds));
+      setHitOdds(String(odds.toFixed(2)));
+      setOverOrUnder("UNDER")
     }
 
   }
@@ -357,6 +366,7 @@ const TableRow = ({ rowData, books }) => {
       <td>{rowData.attribute}</td>
       <td>{rowData.game}</td>
       <td>{rowData.impliedLine}</td>
+      <td>{overOrUnder}</td>
       <td>{hitOdds}</td>
       
       {books.map((book, j) => {
