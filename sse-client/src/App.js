@@ -20,7 +20,7 @@ function App() {
 
   useEffect(() => {
     if (!listening) {
-      const events = new EventSource('http://localhost:5000/events');
+      const events = new EventSource('http://localhost:5001/events');
       setListening(true);
   
       return () => {
@@ -67,7 +67,7 @@ function App() {
       
     };
   
-    const events = new EventSource('http://localhost:5000/events');
+    const events = new EventSource('http://localhost:5001/events');
     events.onmessage = handleEventMessage;
   
     return () => {

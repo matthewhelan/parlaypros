@@ -10,7 +10,7 @@ app.use(express.urlencoded({extended: false}));
 
 app.get('/status', (request, response) => response.json({clients: clients.length}));
 
-const PORT = 5000;
+const PORT = 5001;
 
 let clients = [];
 const propMap = new Map();
