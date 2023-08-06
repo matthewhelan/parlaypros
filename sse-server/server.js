@@ -22,14 +22,6 @@ app.listen(PORT, () => {
 
 // defining a line object in the javascript way: 
 function prop(player, league, attribute, game, line) {
-  this.player = player; 
-  this.league = league;
-  this.attribute = attribute; 
-  this.game = game; 
-  this.lines = [line]
-  this.impliedLine = this.computeExpectedLine()
-  this.type = "";
-
   this.deleteBookLine=deleteBookLine;
   function deleteBookLine(book) {
     this.lines = this.lines.filter((line) => {
@@ -56,7 +48,14 @@ function prop(player, league, attribute, game, line) {
 
     this.impliedLine = (expectedValueSum / this.lines.length).toFixed(2);
   }
-
+  
+  this.player = player; 
+  this.league = league;
+  this.attribute = attribute; 
+  this.game = game; 
+  this.lines = [line]
+  this.impliedLine = this.computeExpectedLine()
+  this.type = "";
 }
 
 function keyPropResponse(key, prop, response, reason) {
