@@ -15,6 +15,7 @@ function App() {
   const [ playerFilterValue, setPlayerFilter ] = useState("");
   const [ leagueFilterValue, setLeagueFilter ] = useState("");
   const [ attributeFilterValue, setAttributeFilter ] = useState("");
+  const [ sortByValue, setSortByValue ] = useState("playerDesc")
 
   useEffect(() => {
     if (!listening) {
@@ -124,6 +125,21 @@ function App() {
     ))
   }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue])
 
+  useEffect(() => {
+    const sortedProps = filteredProps.sort((prop1, prop2) => {
+      const playerName1 = prop1.player;
+      const playerName2 = prop2.player;
+
+      if ( sortByValue === "playerAsc" ) {
+        return playerName1 < playerName2 ? -1 : 1; 
+      } else if ( sortByValue === "playerDesc" ) {
+        return playerName1 > playerName2 ? -1 : 1; 
+      }
+
+    })
+    setFilteredProps(sortedProps)
+  }, [sortByValue, filteredProps])
+
   const applyPlayerFilter = (event) => {
     const selectedPlayer = document.getElementById('playerFilter').value;
     setPlayerFilter(selectedPlayer);
@@ -138,6 +154,11 @@ function App() {
     const selectedAttribute = document.getElementById('attributeFilter').value;
     setAttributeFilter(selectedAttribute);
   };
+
+  const applySortBy = (event) => {
+    const selectedFilter = document.getElementById('sortBy').value;
+    setSortByValue(selectedFilter);
+  }
 
   return (
     <div>
@@ -171,6 +192,13 @@ function App() {
           ))
         }
       </select>
+
+      <label for="sortBy">Sort By:</label>
+      <select value={sortByValue} id="sortBy" onChange={applySortBy}>
+        <option value="playerAsc">Player Name Asc</option>
+        <option value="playerDesc">Player Name Desc</option>
+      </select>
+
     </div>
 
     <table className="stats-table">
