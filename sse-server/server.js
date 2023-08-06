@@ -26,8 +26,8 @@ function prop(player, league, attribute, game, line) {
   this.league = league;
   this.attribute = attribute; 
   this.game = game; 
-  this.impliedLine = line.expectedValue
   this.lines = [line]
+  this.impliedLine = this.computeExpectedLine()
   this.type = "";
 
   this.deleteBookLine=deleteBookLine;
