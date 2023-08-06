@@ -15,7 +15,8 @@ function App() {
   const [ playerFilterValue, setPlayerFilter ] = useState("");
   const [ leagueFilterValue, setLeagueFilter ] = useState("");
   const [ attributeFilterValue, setAttributeFilter ] = useState("");
-  const [ sortByValue, setSortByValue ] = useState("playerDesc")
+  const [ sortByValue, setSortByValue ] = useState("")
+  const [ primaryBookValue, setPrimaryBookValue ] = useState("")
 
   useEffect(() => {
     if (!listening) {
@@ -75,13 +76,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const updatedUniqueBooks = Array.from(
-      new Set(
-        propArray.flatMap((prop) => prop.lines.flatMap((line) => line.book))
-      )
-    );
-    setUniqueBooks(updatedUniqueBooks);
-
     const updatedUniquePlayerNames = Array.from(
       new Set(
         filteredProps.filter((prop) => 
@@ -126,6 +120,21 @@ function App() {
   }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue])
 
   useEffect(() => {
+    const updatedUniqueBooks = Array.from(
+      new Set(
+        propArray.flatMap((prop) => prop.lines.flatMap((line) => line.book))
+      )
+    ).filter((book) => book !== primaryBookValue);
+
+    if ( primaryBookValue !== "" ) {
+      updatedUniqueBooks.unshift(primaryBookValue);
+    }
+
+    setUniqueBooks(updatedUniqueBooks);
+
+  }, [propArray, primaryBookValue])
+
+  useEffect(() => {
     const sortedProps = filteredProps.sort((prop1, prop2) => {
       const playerName1 = prop1.player;
       const playerName2 = prop2.player;
@@ -137,7 +146,10 @@ function App() {
       }
 
     })
-    setFilteredProps(sortedProps)
+
+    if ( sortByValue !== "" ) {
+      setFilteredProps(sortedProps)
+    }
   }, [sortByValue, filteredProps])
 
   const applyPlayerFilter = (event) => {
@@ -158,6 +170,11 @@ function App() {
   const applySortBy = (event) => {
     const selectedFilter = document.getElementById('sortBy').value;
     setSortByValue(selectedFilter);
+  }
+
+  const applyPrimaryBookSelector = (event) => {
+    const primaryBook = document.getElementById('primaryBookSelector').value;
+    setPrimaryBookValue(primaryBook);
   }
 
   return (
@@ -195,8 +212,19 @@ function App() {
 
       <label for="sortBy">Sort By:</label>
       <select value={sortByValue} id="sortBy" onChange={applySortBy}>
+        <option value="">Select Sort Order</option>
         <option value="playerAsc">Player Name Asc</option>
         <option value="playerDesc">Player Name Desc</option>
+      </select>
+
+      <label for="primaryBook">Primary Book:</label>
+      <select value={primaryBookValue} id="primaryBookSelector" onChange={applyPrimaryBookSelector}>
+        <option value="">Select Primary Book</option>
+        {
+          uniqueBooks.map((book, i) => (
+            <option key={i} value={book}>{book}</option>
+          ))
+        }
       </select>
 
     </div>
@@ -209,6 +237,7 @@ function App() {
           <th>Attribute</th>
           <th>Game</th>
           <th>Avg Line</th>
+          <th>Odds To Hit</th>
           {
             uniqueBooks.map((book, i) => 
               <th key={i}>{book}</th>
@@ -226,9 +255,12 @@ function App() {
   );
 }
 
+var cdf = require( '@stdlib/stats-base-dists-poisson-cdf' );
+
 const TableRow = ({ rowData, books }) => {
   const [rowClass, setRowClass] = useState("");
   const [prevRowData, setPrevRowData] = useState(rowData);
+  const [hitOdds, setHitOdds] = useState("");
 
   const animateChanges = () => {
     if ( rowClass === "" ) {
@@ -279,6 +311,32 @@ const TableRow = ({ rowData, books }) => {
     });
   };
 
+  const favorableSideOdds = () => {
+    const fImpliedLine = parseFloat(rowData.impliedLine);
+    const matchingLine = rowData.lines.find((line) => line.book === books[0]);
+    const fpBookLine = parseFloat(matchingLine.line);
+
+    let odds = 0.0;
+    let over = true;
+
+    if ( fpBookLine > fImpliedLine ) {
+      over = true;
+      odds = 1 - cdf(fpBookLine, fImpliedLine);
+
+    } else {
+      over = false;
+      odds = cdf(fpBookLine, fImpliedLine);
+
+    }
+
+    if ( over ) {
+      setHitOdds("O" + String(odds));
+    } else {
+      setHitOdds("U" + String(odds));
+    }
+
+  }
+
   useEffect(() => {
     animateLineChanges();
     setPrevRowData(rowData);
@@ -286,6 +344,10 @@ const TableRow = ({ rowData, books }) => {
 
   useEffect(() => {
     animateChanges();
+
+    // going to determine win percentage
+    favorableSideOdds();
+
   }, [rowData, books]);
 
   return (
@@ -295,6 +357,8 @@ const TableRow = ({ rowData, books }) => {
       <td>{rowData.attribute}</td>
       <td>{rowData.game}</td>
       <td>{rowData.impliedLine}</td>
+      <td>{hitOdds}</td>
+      
       {books.map((book, j) => {
         const matchingLine = rowData.lines.find((line) => line.book === book);
         return (

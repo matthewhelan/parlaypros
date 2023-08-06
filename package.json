@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@stdlib/stats-base-dists-poisson-cdf": "^0.0.7"
+  }
+}

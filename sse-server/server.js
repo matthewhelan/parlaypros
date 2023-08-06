@@ -29,7 +29,7 @@ function prop(player, league, attribute, game, line) {
           return line;
         }
     });
-    this.line = this.computeExpectedLine()
+    this.impliedLine = this.computeExpectedLine()
     // have to clean up object if it has no new lines
     return;
   }
@@ -37,7 +37,7 @@ function prop(player, league, attribute, game, line) {
   this.addBookLine=addBookLine; 
   function addBookLine(bookLine) {
     this.lines = this.lines.concat(bookLine);
-    this.line = this.computeExpectedLine();
+    this.impliedLine = this.computeExpectedLine();
     return;
   }
 
