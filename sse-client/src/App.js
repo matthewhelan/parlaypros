@@ -271,7 +271,7 @@ const TableRow = ({ rowData, books }) => {
           <td key={`prop-${rowData.player}-${rowData.league}-${rowData.attribute}-book-${book}`} id={`prop-${rowData.player}-${rowData.league}-${rowData.attribute}-book-${book}`}>
             {matchingLine ? matchingLine.value : '-'}
             <sup>{matchingLine ? matchingLine.over : '-'}</sup>&frasl;<sub>{matchingLine ? matchingLine.under : '-'}</sub>
-            <sup>{matchingLine ? matchingLine.over : '-'}</sup>&frasl;<sub>{matchingLine ? matchingLine.under : '-'}</sub>
+            <sup>{matchingLine ? matchingLine.noVigOver : '-'}</sup>&frasl;<sub>{matchingLine ? matchingLine.noVigUnder : '-'}</sub>
           </td>
         );
       })}
