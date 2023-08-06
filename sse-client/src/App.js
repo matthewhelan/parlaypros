@@ -317,6 +317,8 @@ const TableRow = ({ rowData, books }) => {
     const fImpliedLine = parseFloat(rowData.impliedLine);
     const matchingLine = rowData.lines.find((line) => line.book === books[0]);
     if ( typeof matchingLine === 'undefined' ) {
+      setHitOdds("-")
+      setOverOrUnder("-")
       return;
     }
     const fpBookLine = parseFloat(matchingLine.value);
