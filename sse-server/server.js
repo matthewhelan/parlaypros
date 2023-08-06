@@ -29,7 +29,7 @@ function prop(player, league, attribute, game, line) {
           return line;
         }
     });
-    this.computeExpectedLine()
+    this.line = this.computeExpectedLine()
     // have to clean up object if it has no new lines
     return;
   }
@@ -37,7 +37,7 @@ function prop(player, league, attribute, game, line) {
   this.addBookLine=addBookLine; 
   function addBookLine(bookLine) {
     this.lines = this.lines.concat(bookLine);
-    this.computeExpectedLine();
+    this.line = this.computeExpectedLine();
     return;
   }
 
@@ -46,7 +46,7 @@ function prop(player, league, attribute, game, line) {
     const expectedValueSum = this.lines.reduce((accumulator, line) => 
       accumulator + parseFloat(line.expectedValue), 0)
 
-    this.impliedLine = (expectedValueSum / this.lines.length).toFixed(2);
+    return (expectedValueSum / this.lines.length).toFixed(2);
   }
   
   this.player = player; 
