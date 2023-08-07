@@ -73,7 +73,7 @@ function prop(player, league, attribute, game, line) {
 
       line.overOrUnder = dir;
       console.log(odds)
-      line.hitOdds = String(odds.toFixed(2));
+      line.hitOdds = String(odds.toFixed(4));
 
     })
     
