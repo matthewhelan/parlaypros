@@ -126,6 +126,16 @@ function App() {
       
     return containedBooks.has(book);
   }
+
+  function getPropBookLine(prop, book) {
+    const propBookLine = prop.lines.filter((line => line.book === book))
+    if ( propBookLine.length === 0 ) {
+      return undefined
+    } else {
+      return propBookLine[0]
+    }
+    
+  }
   
   useEffect(() => {
     const updatedUniqueBooks = Array.from(
@@ -143,21 +153,42 @@ function App() {
   }, [propArray, primaryBookValue])
 
   useEffect(() => {
-    const sortedProps = filteredProps.sort((prop1, prop2) => {
-      const playerName1 = prop1.player;
-      const playerName2 = prop2.player;
+    // const sortedProps = filteredProps.sort((prop1, prop2) => {
+    //   const playerName1 = prop1.player;
+    //   const playerName2 = prop2.player;
 
-      if ( sortByValue === "playerAsc" ) {
-        return playerName1 < playerName2 ? -1 : 1; 
-      } else if ( sortByValue === "playerDesc" ) {
-        return playerName1 > playerName2 ? -1 : 1; 
+    //   if ( sortByValue === "playerAsc" ) {
+    //     return playerName1 < playerName2 ? -1 : 1; 
+    //   } else if ( sortByValue === "playerDesc" ) {
+    //     return playerName1 > playerName2 ? -1 : 1; 
+    //   }
+
+    // })
+
+    // if ( sortByValue !== "" ) {
+    //   setFilteredProps(sortedProps)
+    // }
+
+    const sortedProps = filteredProps.sort((prop1, prop2) => {
+      const line1 = getPropBookLine(prop1, primaryBookValue);
+      const line2 = getPropBookLine(prop2, primaryBookValue);
+
+      if ( typeof line1 === 'undefined' || typeof line2 === 'undefined' ) {
+        return true // this should never happen
+      } else {
+          if ( sortByValue === "hitOddsDescending" ) {
+            return line1.hitOdds < line2.hitOdds ? -1 : 1; 
+          } else if ( sortByValue === "hitOddsAscending" ) {
+            return line1.hitOdds > line2.hitOdds ? -1 : 1; 
+          }
       }
 
     })
 
     if ( sortByValue !== "" ) {
       setFilteredProps(sortedProps)
-    }
+    } 
+
   }, [sortByValue, filteredProps])
 
   const applyPlayerFilter = (event) => {
@@ -221,8 +252,8 @@ function App() {
       <label for="sortBy">Sort By:</label>
       <select value={sortByValue} id="sortBy" onChange={applySortBy}>
         <option value="">Select Sort Order</option>
-        <option value="playerAsc">Player Name Asc</option>
-        <option value="playerDesc">Player Name Desc</option>
+        <option value="hitOddsDescending">Sort By Odds Descending</option>
+        <option value="hitOddsAscending">Sort By Odds Ascending</option>
       </select>
 
       <label for="primaryBook">Primary Book:</label>
