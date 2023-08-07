@@ -7,6 +7,7 @@ function App() {
   const [ propArray, setPropArray ] = useState([]);
   const [ propMap, setPropMap ] = useState(new Map());
   const [ filteredProps, setFilteredProps ] = useState([]);
+  const [ sortedAndFilteredProps, setSortedAndFilteredProps ] = useState([]);
   const [ listening, setListening ] = useState(false);
   const [ uniqueBooks, setUniqueBooks ] = useState([]);
   const [ uniquePlayerNames, setUniquePlayerNames ] = useState([]);
@@ -117,7 +118,7 @@ function App() {
       (attributeFilterValue === "" || attributeFilterValue === prop.attribute) && 
       (primaryBookValue === "" || propHasBookLine(prop, primaryBookValue) )
     ))
-  }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue, primaryBookValue, primaryBookValue])
+  }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue, primaryBookValue])
 
   function propHasBookLine(prop, book) {
     const containedBooks = new Set (
@@ -153,43 +154,28 @@ function App() {
   }, [propArray, primaryBookValue])
 
   useEffect(() => {
-    // const sortedProps = filteredProps.sort((prop1, prop2) => {
-    //   const playerName1 = prop1.player;
-    //   const playerName2 = prop2.player;
+    if ( sortByValue === "" ) {
+      setSortedAndFilteredProps(filteredProps)
+    }
 
-    //   if ( sortByValue === "playerAsc" ) {
-    //     return playerName1 < playerName2 ? -1 : 1; 
-    //   } else if ( sortByValue === "playerDesc" ) {
-    //     return playerName1 > playerName2 ? -1 : 1; 
-    //   }
-
-    // })
-
-    // if ( sortByValue !== "" ) {
-    //   setFilteredProps(sortedProps)
-    // }
-
-    const sortedProps = filteredProps.sort((prop1, prop2) => {
+    const sortedProps = filteredProps.slice(0).sort((prop1, prop2) => {
       const line1 = getPropBookLine(prop1, primaryBookValue);
       const line2 = getPropBookLine(prop2, primaryBookValue);
 
       if ( typeof line1 === 'undefined' || typeof line2 === 'undefined' ) {
         return true // this should never happen
       } else {
-          if ( sortByValue === "hitOddsDescending" ) {
-            return line1.hitOdds < line2.hitOdds ? -1 : 1; 
-          } else if ( sortByValue === "hitOddsAscending" ) {
-            return line1.hitOdds > line2.hitOdds ? -1 : 1; 
-          }
+        if ( sortByValue === "hitOddsDescending" ) {
+          return line1.hitOdds < line2.hitOdds ? -1 : 1; 
+        } else if ( sortByValue === "hitOddsAscending" ) {
+          return line1.hitOdds > line2.hitOdds ? -1 : 1; 
+        } 
       }
 
     })
-
-    if ( sortByValue !== "" ) {
-      setFilteredProps(sortedProps)
-    } 
-
-  }, [sortByValue, filteredProps])
+    
+    setSortedAndFilteredProps(sortedProps)     
+  }, [sortByValue, filteredProps, primaryBookValue])
 
   const applyPlayerFilter = (event) => {
     const selectedPlayer = document.getElementById('playerFilter').value;
@@ -286,7 +272,7 @@ function App() {
         </tr>
       </thead>
       <tbody>
-        { filteredProps.map((prop, index) => (
+        { sortedAndFilteredProps.map((prop, index) => (
           <TableRow key={prop.player + prop.attribute + prop.league} rowData={prop} books={uniqueBooks}/>
         ))}
       </tbody>
