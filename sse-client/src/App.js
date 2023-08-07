@@ -28,7 +28,6 @@ function App() {
       };
     }
   }, [listening]);
-  
 
   function reviver(key, value) {
     if(typeof value === 'object' && value !== null) {
@@ -115,10 +114,19 @@ function App() {
     setFilteredProps(propArray.filter((prop) => 
       (playerFilterValue === "" || playerFilterValue === prop.player) &&
       (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
-      (attributeFilterValue === "" || attributeFilterValue === prop.attribute)
+      (attributeFilterValue === "" || attributeFilterValue === prop.attribute) && 
+      (primaryBookValue === "" || propHasBookLine(prop, primaryBookValue) )
     ))
-  }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue])
+  }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue, primaryBookValue, primaryBookValue])
 
+  function propHasBookLine(prop, book) {
+    const containedBooks = new Set (
+      prop.lines.flatMap((line => line.book))
+    )
+      
+    return containedBooks.has(book);
+  }
+  
   useEffect(() => {
     const updatedUniqueBooks = Array.from(
       new Set(
@@ -256,13 +264,13 @@ function App() {
   );
 }
 
-var cdf = require( '@stdlib/stats-base-dists-poisson-cdf' );
 
 const TableRow = ({ rowData, books }) => {
   const [rowClass, setRowClass] = useState("");
   const [prevRowData, setPrevRowData] = useState(rowData);
-  const [hitOdds, setHitOdds] = useState("");
   const [overOrUnder, setOverOrUnder] = useState("");
+  const [hitOdds, setHitOdds] = useState("");
+
 
   const animateChanges = () => {
     if ( rowClass === "" ) {
@@ -313,41 +321,6 @@ const TableRow = ({ rowData, books }) => {
     });
   };
 
-  const favorableSideOdds = () => {
-    const fImpliedLine = parseFloat(rowData.impliedLine);
-    const matchingLine = rowData.lines.find((line) => line.book === books[0]);
-    if ( typeof matchingLine === 'undefined' ) {
-      setHitOdds("-")
-      setOverOrUnder("-")
-      return;
-    }
-    const fpBookLine = parseFloat(matchingLine.value);
-
-    
-
-    let odds = 0.0;
-    let over = true;
-
-    if ( fpBookLine > fImpliedLine ) {
-      over = true;
-      odds = 1 - cdf(fpBookLine, fImpliedLine);
-
-    } else {
-      over = false;
-      odds = cdf(fpBookLine, fImpliedLine);
-
-    }
-
-    if ( over ) {
-      setHitOdds("%" + String((odds * 100).toFixed(2)));
-      setOverOrUnder("OVER")
-    } else {
-      setHitOdds("%" + String((odds  * 100).toFixed(2)));
-      setOverOrUnder("UNDER")
-    }
-
-  }
-
   useEffect(() => {
     animateLineChanges();
     setPrevRowData(rowData);
@@ -355,11 +328,21 @@ const TableRow = ({ rowData, books }) => {
 
   useEffect(() => {
     animateChanges();
-
-    // going to determine win percentage
-    favorableSideOdds();
-
+    setDirectionAndOdds()
   }, [rowData, books]);
+
+  function setDirectionAndOdds() {
+    // extract the line corresponding to book[0]
+    // set overOrUnder and hitOdds accordingly
+    const arrayOfMatchingBook = rowData.lines.filter((line) => line.book === books[0])
+
+    if ( arrayOfMatchingBook.length === 0 ) {
+      return;
+    }
+
+    setOverOrUnder(arrayOfMatchingBook[0].overOrUnder)
+    setHitOdds("%" + String((arrayOfMatchingBook[0].hitOdds * 100).toFixed(2)))
+  }
 
   return (
     <tr className={rowClass}>
@@ -368,8 +351,10 @@ const TableRow = ({ rowData, books }) => {
       <td>{rowData.attribute}</td>
       <td>{rowData.game}</td>
       <td>{rowData.impliedLine}</td>
+      
       <td>{overOrUnder}</td>
       <td>{hitOdds}</td>
+      
       
       {books.map((book, j) => {
         const matchingLine = rowData.lines.find((line) => line.book === book);

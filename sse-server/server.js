@@ -1,3 +1,5 @@
+var cdf = require( '@stdlib/stats-base-dists-poisson-cdf' );
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -43,10 +45,40 @@ function prop(player, league, attribute, game, line) {
 
   this.computeExpectedLine=computeExpectedLine;
   function computeExpectedLine() {
-    const expectedValueSum = this.lines.reduce((accumulator, line) => 
-      accumulator + parseFloat(line.expectedValue), 0)
+    const expectedValueSum = this.lines.reduce((accumulator, line) => accumulator + parseFloat(line.expectedValue), 0)
 
+    // as part of this function, we should also compute the over/under and the 
+    // hitOdds for every single line(adding it as an attribute)
+
+    const impliedValue = expectedValueSum / this.lines.length; 
+
+    this.lines.forEach((line) => {
+      let odds = 0.5; 
+      let dir = "OVER"; 
+
+      const fImpliedLine = impliedValue;
+      const fpBookLine = parseFloat(line.value);
+      console.log("fImpliedLine:")
+      console.log(fImpliedLine)
+      console.log("fpBookLine:")
+      console.log(fpBookLine)
+
+      if ( fpBookLine > fImpliedLine ) {
+        dir = "UNDER";
+        odds = cdf(fpBookLine, fImpliedLine);
+      } else {
+        dir = "OVER";
+        odds = 1 - cdf(fpBookLine, fImpliedLine);
+      }
+
+      line.overOrUnder = dir;
+      console.log(odds)
+      line.hitOdds = String(odds.toFixed(2));
+
+    })
+    
     return String((expectedValueSum / this.lines.length).toFixed(2));
+
   }
   
   this.player = player; 
