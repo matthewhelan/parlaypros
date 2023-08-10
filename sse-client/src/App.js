@@ -20,6 +20,18 @@ function App() {
   const [ primaryBookValue, setPrimaryBookValue ] = useState("")
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+
+  const bookImages = {
+    DraftKings : require('./static/dk.png'),
+    BetMGM : require('./static/mgm.png'),
+    Caesars : require('./static/caesars.png'),
+    FanDuel : require('./static/fd.png'),
+    Betano : require('./static/betano.png'),
+    Underdog : require('./static/ud.png'),
+    BetRivers : require('./static/betrivers.png'),
+    PointsBet : require('./static/pointsbet.png'),
+  }
+
   useEffect(() => {
     if (!listening) {
       const events = new EventSource('http://localhost:5001/events');
@@ -277,7 +289,9 @@ function App() {
           <th>Odds To Hit</th>
           {
             uniqueBooks.map((book, i) => 
-              <th key={i}>{book}</th>
+              <th key={i}>
+                <img src={bookImages[book]} alt={book} width="30" height="30" />
+              </th>
             )
           }
         </tr>
