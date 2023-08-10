@@ -18,6 +18,7 @@ function App() {
   const [ attributeFilterValue, setAttributeFilter ] = useState("");
   const [ sortByValue, setSortByValue ] = useState("")
   const [ primaryBookValue, setPrimaryBookValue ] = useState("")
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (!listening) {
@@ -41,7 +42,8 @@ function App() {
 
   useEffect(() => {
     setPropArray(() => {
-      return Array.from(propMap.values())})
+      return Array.from(propMap.values())
+    })
   }, [propMap]);
 
   useEffect(() => {
@@ -165,9 +167,9 @@ function App() {
       if ( typeof line1 === 'undefined' || typeof line2 === 'undefined' ) {
         return true // this should never happen
       } else {
-        if ( sortByValue === "hitOddsDescending" ) {
+        if ( sortByValue === "hitOddsAscending" ) {
           return line1.hitOdds < line2.hitOdds ? -1 : 1; 
-        } else if ( sortByValue === "hitOddsAscending" ) {
+        } else if ( sortByValue === "hitOddsDescending" ) {
           return line1.hitOdds > line2.hitOdds ? -1 : 1; 
         } 
       }
@@ -238,8 +240,8 @@ function App() {
       <label for="sortBy">Sort By:</label>
       <select value={sortByValue} id="sortBy" onChange={applySortBy}>
         <option value="">Select Sort Order</option>
-        <option value="hitOddsDescending">Sort By Odds Descending</option>
-        <option value="hitOddsAscending">Sort By Odds Ascending</option>
+        <option value="hitOddsDescending">Odds Descending</option>
+        <option value="hitOddsAscending">Odds Ascending</option>
       </select>
 
       <label for="primaryBook">Primary Book:</label>
@@ -252,6 +254,15 @@ function App() {
         }
       </select>
 
+      <label>
+      Show Advanced Info:
+      <input
+        type="checkbox"
+        checked={showAdvanced}
+        onChange={() => setShowAdvanced(!showAdvanced)}
+      />
+    </label>
+
     </div>
 
     <table className="stats-table">
@@ -261,7 +272,7 @@ function App() {
           <th>League</th>
           <th>Attribute</th>
           <th>Game</th>
-          <th>Avg Line</th>
+          {showAdvanced &&<th>Avg Line</th>}
           <th>O/U</th>
           <th>Odds To Hit</th>
           {
@@ -273,7 +284,7 @@ function App() {
       </thead>
       <tbody>
         { sortedAndFilteredProps.map((prop, index) => (
-          <TableRow key={prop.player + prop.attribute + prop.league} rowData={prop} books={uniqueBooks}/>
+          <TableRow key={prop.player + prop.attribute + prop.league} rowData={prop} books={uniqueBooks} showAdvanced={showAdvanced}/>
         ))}
       </tbody>
     </table>
@@ -282,11 +293,13 @@ function App() {
 }
 
 
-const TableRow = ({ rowData, books }) => {
+const TableRow = ({ rowData, books, showAdvanced }) => {
   const [rowClass, setRowClass] = useState("");
   const [prevRowData, setPrevRowData] = useState(rowData);
   const [overOrUnder, setOverOrUnder] = useState("");
   const [hitOdds, setHitOdds] = useState("");
+  const [pushOdds, setPushOdds] = useState("");
+
 
 
   const animateChanges = () => {
@@ -356,10 +369,12 @@ const TableRow = ({ rowData, books }) => {
     if ( arrayOfMatchingBook.length === 0 ) {
       return;
     }
-
-    setOverOrUnder(arrayOfMatchingBook[0].overOrUnder)
-    setHitOdds("%" + String((arrayOfMatchingBook[0].hitOdds * 100).toFixed(2)))
-  }
+      setOverOrUnder(arrayOfMatchingBook[0].overOrUnder)
+      setHitOdds(String((arrayOfMatchingBook[0].hitOdds * 100).toFixed(2))+'%')
+      if (arrayOfMatchingBook[0].pushOdds !== null) {
+        setPushOdds((arrayOfMatchingBook[0].pushOdds * 100).toFixed(2) + '%');
+      }  
+    }
 
   return (
     <tr className={rowClass}>
@@ -367,10 +382,13 @@ const TableRow = ({ rowData, books }) => {
       <td>{rowData.league}</td>
       <td>{rowData.attribute}</td>
       <td>{rowData.game}</td>
-      <td>{rowData.impliedLine}</td>
+      {showAdvanced ? <td>{rowData.impliedLine}</td> : ''}
       
       <td>{overOrUnder}</td>
-      <td>{hitOdds}</td>
+
+      <td>{hitOdds}
+      {showAdvanced && pushOdds ? <div className="small-gray-text">Push Odds {pushOdds}</div>: ''}
+      </td>
       
       
       {books.map((book, j) => {
@@ -378,8 +396,20 @@ const TableRow = ({ rowData, books }) => {
         return (
           <td key={`prop-${rowData.player}-${rowData.league}-${rowData.attribute}-book-${book}`} id={`prop-${rowData.player}-${rowData.league}-${rowData.attribute}-book-${book}`}>
             {matchingLine ? matchingLine.value : '-'}
-            <sup>{matchingLine ? matchingLine.over : '-'}</sup>&frasl;<sub>{matchingLine ? matchingLine.under : '-'}</sub>
-            <sup>{matchingLine ? matchingLine.noVigOver : '-'}</sup>&frasl;<sub>{matchingLine ? matchingLine.noVigUnder : '-'}</sub>
+
+            {showAdvanced ? (
+            <span>
+              <sup>{matchingLine ? matchingLine.noVigOver : ''}</sup>
+              {matchingLine && matchingLine.over !== '' && matchingLine.under !== '' && <>&frasl;</>}
+              <sub>{matchingLine ? matchingLine.noVigUnder : ''}</sub>
+            </span>
+            ) : (
+            <span>
+              <sup>{matchingLine ? matchingLine.over : ''}</sup>
+              {matchingLine && matchingLine.over !== '' && matchingLine.under !== '' && <>&frasl;</>}
+              <sub>{matchingLine ? matchingLine.under : ''}</sub>
+            </span>
+            )}
           </td>
         );
       })}

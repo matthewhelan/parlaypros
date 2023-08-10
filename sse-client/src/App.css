@@ -46,3 +46,8 @@ body {
   background-color: red;
   color: black;
 }
+
+.small-gray-text {
+  font-size: 0.8em;
+  color: gray;
+}

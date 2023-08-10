@@ -1,4 +1,5 @@
 var cdf = require( '@stdlib/stats-base-dists-poisson-cdf' );
+var pmf = require('@stdlib/stats-base-dists-poisson-pmf');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -54,26 +55,44 @@ function prop(player, league, attribute, game, line) {
 
     this.lines.forEach((line) => {
       let odds = 0.5; 
-      let dir = "OVER"; 
+      let dir = "Over"; 
 
       const fImpliedLine = impliedValue;
       const fpBookLine = parseFloat(line.value);
-      console.log("fImpliedLine:")
-      console.log(fImpliedLine)
-      console.log("fpBookLine:")
-      console.log(fpBookLine)
+      // console.log("fImpliedLine:")
+      // console.log(fImpliedLine)
+      // console.log("fpBookLine:")
+      // console.log(fpBookLine)
 
-      if ( fpBookLine > fImpliedLine ) {
-        dir = "UNDER";
-        odds = cdf(fpBookLine, fImpliedLine);
+      let fPush = null; //add push chance, but only if 0.5 divides evenly (.0 line)
+      if ((fpBookLine / 0.5) % 2 === 0) {
+          fPush = pmf(fpBookLine, fImpliedLine)
+          //get the prob of the under hitting (no push)
+          let u_odds = cdf(fpBookLine-1, fImpliedLine)
+          //get the prob of the over hitting (no push)
+          let o_odds = 1 - cdf(fpBookLine, fImpliedLine)
+          //if under is favored, use its ratio, else use over ratio
+          if (u_odds > o_odds) {
+            odds = u_odds / (u_odds + o_odds)
+            dir = "Under"
+          } else {
+            odds = o_odds / (u_odds + o_odds)
+          }
       } else {
-        dir = "OVER";
-        odds = 1 - cdf(fpBookLine, fImpliedLine);
+          let u_odds = cdf(fpBookLine, fImpliedLine)
+          if(u_odds > 0.5){
+            dir = "Under"
+            odds = u_odds
+          } else {
+            odds = 1-u_odds
+          }
+
       }
 
       line.overOrUnder = dir;
       console.log(odds)
       line.hitOdds = String(odds.toFixed(4));
+      line.pushOdds = fPush
 
     })
     
