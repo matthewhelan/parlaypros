@@ -1,53 +1,62 @@
+/* Override Bootstrap Color Variables for Dark Mode */
+
 body {
-  color: #555;
-  font-size: 25px;
+  background-color: var(--dark); /* Set the dark background color */
+  color: var(--light);
+  font-size: 12px;
   line-height: 1.5;
-  margin: 0 auto;
-  max-width: 50em;
-  padding: 4em 1em;
 }
 
-.stats-table {
-  border-collapse: collapse;
-  text-align: center;
-  width: 100%;
+.container-fluid .table-hover .newRow {
+  transition: --bs-table-bg 0.5s, --bs-table-color 0.5s; /* Add more properties as needed */
+  --bs-table-bg: yellow ;
+  --bs-table-color: black;
 }
 
-.stats-table tbody tr:hover {
-  background-color: #f5f5f5;
+.container-fluid .table-hover .standardRow {
+  transition: --bs-table-bg 0.5s, --bs-table-color 0.5s; /* Add more properties as needed */
+  --bs-table-bg: initial;
+  --bs-table-color: initial;
 }
 
-.newRow {
-  transition: background-color 0.5s, color 0.5s; /* Add more properties as needed */
-  background-color: yellow;
-  color: black;
+.container-fluid .table-hover .newRow .new-cell-animation {
+  transition: --bs-table-bg 0.5s, --bs-table-color 0.5s ; /* Add more properties as needed */
+  --bs-table-bg: yellow;
+  --bs-table-color: black;
 }
 
-.standardRow {
-  transition: background-color 0.5s, color 0.5s; /* Add more properties as needed */
-  background-color: initial;
-  color: initial;
-}
-
-.new-cell-animation {
-  transition: background-color 0.5s, color 0.5s; /* Add more properties as needed */
-  background-color: yellow;
-  color: black;
-}
-
-.increase-cell-animation {
-  transition: background-color 0.5s, color 0.5s; /* Add more properties as needed */
+.container-fluid .table-hover .newRow .increase-cell-animation {
+  transition: background-color 0.5s, --bs-table-color 0.5s; /* Add more properties as needed */
   background-color: green;
-  color: black;
+  --bs-table-color: black;
 }
 
-.decrease-cell-animation {
-  transition: background-color 0.5s, color 0.5s; /* Add more properties as needed */
-  background-color: red;
-  color: black;
+.container-fluid .table-hover .newRow .decrease-cell-animation {
+  transition: --bs-table-bg 0.5s, --bs-table-color 0.5s; /* Add more properties as needed */
+  --bs-table-bg: red;
+  --bs-table-color: black;
 }
 
 .small-gray-text {
   font-size: 0.8em;
   color: gray;
 }
+
+.form-check {
+  display: flex;
+  align-items: center;
+}
+
+.form-check-label {
+  margin: 0;
+}
+
+/* .table-hover tbody tr:hover {
+  background-color: #ff5959; 
+  color: #fff;/
+}
+
+.table-hover tbody tr:hover td {
+  background-color: rgba(255, 89, 89, 0.5); 
+}  */
+

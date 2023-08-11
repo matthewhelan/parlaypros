@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
+ import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function App() {
   // okay so we're going to have a propArray that is recalculated
@@ -217,10 +219,11 @@ function App() {
   }
 
   return (
-    <div>
-    <div> 
-      <label for="playerFilter">Filter by Player:</label>
-      <select value={playerFilterValue} id="playerFilter" onChange={applyPlayerFilter}>
+    <div className="vh-100 bg-dark text-light p-4">
+    <div className='container'> 
+    <div className='form-group'>
+      <label for="playerFilter" className="form-label">Filter by Player:</label>
+      <select class="form-control bg-dark text-light" value={playerFilterValue} id="playerFilter" onChange={applyPlayerFilter}>
         <option value="">Select Player</option>
         {
           uniquePlayerNames.map((playerName, i) => (
@@ -229,8 +232,8 @@ function App() {
         }
       </select>
 
-      <label for="leagueFilter">Filter by League:</label>
-      <select value={leagueFilterValue} id="leagueFilter" onChange={applyLeagueFilter}>
+      <label for="leagueFilter" className="form-label">Filter by League:</label>
+      <select class="form-control bg-dark text-light" value={leagueFilterValue} id="leagueFilter" onChange={applyLeagueFilter}>
         <option value="">Select League</option>
         {
           uniqueLeagues.map((league, i) => (
@@ -239,8 +242,8 @@ function App() {
         }
       </select>
 
-      <label for="attributeFilter">Filter by Attribute:</label>
-      <select value={attributeFilterValue} id="attributeFilter" onChange={applyAttributeFilter}>
+      <label for="attributeFilter" className="form-label">Filter by Attribute:</label>
+      <select class="form-control bg-dark text-light" value={attributeFilterValue} id="attributeFilter" onChange={applyAttributeFilter}>
         <option value="">Select Attribute</option>
         {
           uniqueAttributes.map((attribute, i) => (
@@ -249,15 +252,15 @@ function App() {
         }
       </select>
 
-      <label for="sortBy">Sort By:</label>
-      <select value={sortByValue} id="sortBy" onChange={applySortBy}>
+      <label for="sortBy" className="form-label">Sort By:</label>
+      <select class="form-control bg-dark text-light" value={sortByValue} id="sortBy" onChange={applySortBy}>
         <option value="">Select Sort Order</option>
         <option value="hitOddsDescending">Odds Descending</option>
         <option value="hitOddsAscending">Odds Ascending</option>
       </select>
 
-      <label for="primaryBook">Primary Book:</label>
-      <select value={primaryBookValue} id="primaryBookSelector" onChange={applyPrimaryBookSelector}>
+      <label for="primaryBook" className="form-label">Primary Book:</label>
+      <select  class="form-control bg-dark text-light" value={primaryBookValue} id="primaryBookSelector" onChange={applyPrimaryBookSelector}>
         <option value="">Select Primary Book</option>
         {
           uniqueBooks.map((book, i) => (
@@ -265,19 +268,22 @@ function App() {
           ))
         }
       </select>
+      </div>
 
-      <label>
-      Show Advanced Info:
+      <label htmlFor="showAdvanced" className='form-check-label'>Show Advanced Info:      </label>
+
+      <div className='form-check'>
       <input
-        type="checkbox"
-        checked={showAdvanced}
+        type="checkbox" className="form-check-input"
+        checked={showAdvanced} id="showAdvanced"
         onChange={() => setShowAdvanced(!showAdvanced)}
       />
-    </label>
-
     </div>
 
-    <table className="stats-table">
+    </div>
+    <div className='container-fluid'>
+    {/* <div className='table-hover' > */}
+    <table className="table table-dark table-hover">
       <thead>
         <tr>
           <th>Player</th>
@@ -303,6 +309,8 @@ function App() {
       </tbody>
     </table>
     </div>
+    </div>
+    // </div>
   );
 }
 
