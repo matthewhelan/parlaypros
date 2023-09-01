@@ -33,6 +33,7 @@ function App() {
     BetRivers : require('./static/betrivers.png'),
     PointsBet : require('./static/pointsbet.png'),
   }
+  const [ onlyOneBookFilterValue, setSelectedOnlyOneBookFilterValue ] = useState(false);
 
   useEffect(() => {
     if (!listening) {
