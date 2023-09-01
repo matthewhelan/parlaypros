@@ -132,9 +132,10 @@ function App() {
       (playerFilterValue === "" || playerFilterValue === prop.player) &&
       (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
       (attributeFilterValue === "" || attributeFilterValue === prop.attribute) && 
-      (primaryBookValue === "" || propHasBookLine(prop, primaryBookValue) )
+      (primaryBookValue === "" || propHasBookLine(prop, primaryBookValue) ) && 
+      (onlyOneBookFilterValue || prop.lines.length > 1)
     ))
-  }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue, primaryBookValue])
+  }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue, primaryBookValue, onlyOneBookFilterValue])
 
   function propHasBookLine(prop, book) {
     const containedBooks = new Set (
@@ -218,6 +219,12 @@ function App() {
     setPrimaryBookValue(primaryBook);
   }
 
+  const applyOnlyOneBookFilter = (event) => {
+    console.log("current onlyOneBookFilterValue: ")
+    console.log(onlyOneBookFilterValue)
+    setSelectedOnlyOneBookFilterValue(!onlyOneBookFilterValue);
+  }
+
   return (
     <div className="vh-100 bg-dark text-light p-4">
     <div className='container'> 
@@ -278,6 +285,16 @@ function App() {
         checked={showAdvanced} id="showAdvanced"
         onChange={() => setShowAdvanced(!showAdvanced)}
       />
+      <fieldset>
+        <legend>Filters</legend>
+
+        <div>
+          <input type="checkbox" id="onlyOneBookFilter" name="onlyOneBookFilter" onChange={applyOnlyOneBookFilter} />
+          <label for="onlyOneBookFilter">Show lines with one book</label>
+        </div>
+
+      </fieldset>
+
     </div>
 
     </div>
