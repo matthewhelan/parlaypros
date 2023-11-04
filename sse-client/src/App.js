@@ -15,9 +15,11 @@ function App() {
   const [ uniquePlayerNames, setUniquePlayerNames ] = useState([]);
   const [ uniqueLeagues, setUniqueLeagues ] = useState([]);
   const [ uniqueAttributes, setUniqueAttributes ] = useState([]);
+  const [ uniqueGames, setUniqueGames ] = useState([]);
   const [ playerFilterValue, setPlayerFilter ] = useState("");
   const [ leagueFilterValue, setLeagueFilter ] = useState("");
   const [ attributeFilterValue, setAttributeFilter ] = useState("");
+  const [ gameFilterValue, setGameFilter ] = useState("");
   const [ sortByValue, setSortByValue ] = useState("")
   const [ primaryBookValue, setPrimaryBookValue ] = useState("")
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -98,7 +100,8 @@ function App() {
         filteredProps.filter((prop) => 
           (playerFilterValue === "" || playerFilterValue === prop.player) &&
           (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
-          (attributeFilterValue === "" || attributeFilterValue === prop.attribute)
+          (attributeFilterValue === "" || attributeFilterValue === prop.attribute) &&
+          (gameFilterValue === "" || gameFilterValue === prop.game)
         ).flatMap((prop) => prop.player)
       )
     )
@@ -109,7 +112,8 @@ function App() {
         filteredProps.filter((prop) => 
           (playerFilterValue === "" || playerFilterValue === prop.player) &&
           (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
-          (attributeFilterValue === "" || attributeFilterValue === prop.attribute)
+          (attributeFilterValue === "" || attributeFilterValue === prop.attribute) &&
+          (gameFilterValue === "" || gameFilterValue === prop.game)
         ).flatMap((prop) => prop.attribute)
       )
     )
@@ -120,23 +124,37 @@ function App() {
         filteredProps.filter((prop) => 
           (playerFilterValue === "" || playerFilterValue === prop.player) &&
           (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
-          (attributeFilterValue === "" || attributeFilterValue === prop.attribute)
+          (attributeFilterValue === "" || attributeFilterValue === prop.attribute) &&
+          (gameFilterValue === "" || gameFilterValue === prop.game)
         ).flatMap((prop) => prop.league)
       )
     )
     setUniqueLeagues(updatedLeagues)
 
-  }, [filteredProps, playerFilterValue, leagueFilterValue, attributeFilterValue])
+    const updatedGames = Array.from(
+      new Set(
+        filteredProps.filter((prop) => 
+          (playerFilterValue === "" || playerFilterValue === prop.player) &&
+          (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
+          (attributeFilterValue === "" || attributeFilterValue === prop.attribute) &&
+          (gameFilterValue === "" || gameFilterValue === prop.game)
+        ).flatMap((prop) => prop.game)
+      )
+    )
+    setUniqueGames(updatedGames)
+
+  }, [filteredProps, playerFilterValue, leagueFilterValue, attributeFilterValue, gameFilterValue])
 
   useEffect(() => {
     setFilteredProps(propArray.filter((prop) => 
       (playerFilterValue === "" || playerFilterValue === prop.player) &&
       (leagueFilterValue === "" || leagueFilterValue === prop.league) &&
       (attributeFilterValue === "" || attributeFilterValue === prop.attribute) && 
+      (gameFilterValue == "" || gameFilterValue == prop.game) &&
       (primaryBookValue === "" || propHasBookLine(prop, primaryBookValue) ) && 
       (onlyOneBookFilterValue || prop.lines.length > 1)
     ))
-  }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue, primaryBookValue, onlyOneBookFilterValue])
+  }, [propArray, playerFilterValue, leagueFilterValue, attributeFilterValue, gameFilterValue, primaryBookValue, onlyOneBookFilterValue])
 
   function propHasBookLine(prop, book) {
     const containedBooks = new Set (
@@ -215,6 +233,11 @@ function App() {
     setSortByValue(selectedFilter);
   }
 
+  const applyGameFilter = (event) => {
+    const selectedGame = document.getElementById('gameFilter').value;
+    setGameFilter(selectedGame);
+  }
+
   const applyPrimaryBookSelector = (event) => {
     const primaryBook = document.getElementById('primaryBookSelector').value;
     setPrimaryBookValue(primaryBook);
@@ -256,6 +279,16 @@ function App() {
         {
           uniqueAttributes.map((attribute, i) => (
             <option key={i} value={attribute}>{attribute}</option>
+          ))
+        }
+      </select>
+
+      <label for="gameFilter" className="form-label">Filter by Game:</label>
+      <select class="form-control bg-dark text-light" value={gameFilterValue} id="gameFilter" onChange={applyGameFilter}>
+        <option value="">Select Game</option>
+        {
+          uniqueGames.map((game, i) => (
+            <option key={i} value={game}>{game}</option>
           ))
         }
       </select>
