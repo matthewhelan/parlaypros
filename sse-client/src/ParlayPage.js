@@ -1,54 +1,79 @@
 import React from 'react';
+import NavigationBar from './NavigationBar';
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import NavigationBar from './NavigationBar';
 
 const ParlayPage = ({ parlayLines }) => {
-  console.log(parlayLines)
+  const organizeLinesByFirstBook = () => {
+    const linesByFirstBook = {};
+    parlayLines.forEach(line => {
+      const firstBookName = line.lines[0]?.book;
+      if (firstBookName) {
+        if (!linesByFirstBook[firstBookName]) {
+          linesByFirstBook[firstBookName] = [];
+        }
+        linesByFirstBook[firstBookName].push(line);
+      }
+    });
+    return linesByFirstBook;
+  };
+
+  const renderOtherBookLines = (lines, primaryBook) => {
+    return lines
+      .filter(line => line.book !== primaryBook)
+      .map((line, index) => (
+        <div key={index}>
+          {line.book}: {line.value}: {line.over}/{line.under}
+        </div>
+      ));
+  };
+
+  const linesByFirstBook = organizeLinesByFirstBook();
+
   return (
     <div className="vh-100 bg-dark text-light p-4">
-
-    <NavigationBar></NavigationBar>
-
-    <div className="container mt-4">
-      <h2>Current Parlay Lines</h2>
-      {parlayLines.length > 0 ? (
-        <table className="table table-dark table-hover">
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>League</th>
-              <th>Attribute</th>
-              <th>Game</th>
-              {/* Add columns for each book if necessary */}
-              <th>Book/Line Info</th>
-            </tr>
-          </thead>
-          <tbody>
-            {parlayLines.map((line, index) => (
-              <tr key={index}>
-                <td>{line.player}</td>
-                <td>{line.league}</td>
-                <td>{line.attribute}</td>
-                <td>{line.game}</td>
-                <td>
-                  {/* Display books/line information */}
-                  {line.lines.map((bookLine, bookIndex) => (
-                    <div key={bookIndex}>
-                      {bookLine.book}: {bookLine.value}
-                      {/* Add additional book line details if needed */}
-                    </div>
+      <NavigationBar></NavigationBar>
+      <div className="container mt-4">
+        <h2>Current Parlay Lines</h2>
+        {Object.keys(linesByFirstBook).length > 0 ? (
+          Object.entries(linesByFirstBook).map(([bookName, lines], bookIndex) => (
+            <div key={bookIndex}>
+              <h3>{bookName}</h3>
+              <table className="table table-dark table-hover">
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>League</th>
+                    <th>Attribute</th>
+                    <th>Game</th>
+                    <th>Primary Book Line</th>
+                    <th>Other Book Lines</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lines.map((line, index) => (
+                    <tr key={index}>
+                      <td>{line.player}</td>
+                      <td>{line.league}</td>
+                      <td>{line.attribute}</td>
+                      <td>{line.game}</td>
+                      <td>
+                        {line.lines.find(bookLine => bookLine.book === bookName)?.value}
+                      </td>
+                      <td>
+                        {renderOtherBookLines(line.lines, bookName)}
+                      </td>
+                    </tr>
                   ))}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>No parlay lines available.</p>
-      )}
-    </div>
+                </tbody>
+              </table>
+            </div>
+          ))
+        ) : (
+          <p>No parlay lines available.</p>
+        )}
+      </div>
     </div>
   );
 };

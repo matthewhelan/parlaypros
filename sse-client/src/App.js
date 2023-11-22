@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './HomePage';
 import ParlayPage from './ParlayPage'; 
@@ -12,10 +12,13 @@ function App() {
   const [parlayLines, setParlayLines] = useState([]);
 
   const addToParlay = (line) => {
+    console.log(line)
     setParlayLines(prevLines => {
-      // Check if line already exists in parlayLines
-      if (!prevLines.find(l => l.id === line.id)) {
+  
+      // Check if a line with the same player, game, and attribute already exists in parlayLines
+      if (!prevLines.some(l => l.player === line.player && l.game === line.game && l.attribute === line.attribute)) {
         const newLines = [...prevLines, line];
+        console.log('new line')
   
         // Send newLines to the server
         fetch('http://localhost:5001/parlayLines', {
@@ -36,6 +39,7 @@ function App() {
       return prevLines;
     });
   };
+  
     
 
   useEffect(() => {
