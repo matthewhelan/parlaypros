@@ -378,3 +378,16 @@ function replacer(key, value) {
     return value;
   }
 }
+
+//logic for saving parlayLines
+let parlayLinesData = [];
+
+app.post('/parlayLines', (req, res) => {
+  parlayLinesData = req.body.parlayLines;
+  res.status(200).send('Parlay lines updated');
+});
+
+app.get('/parlayLines', (req, res) => {
+  res.json(parlayLinesData);
+});
+
