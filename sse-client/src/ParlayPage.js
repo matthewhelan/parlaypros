@@ -4,7 +4,7 @@ import NavigationBar from './NavigationBar';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const ParlayPage = ({ parlayLines }) => {
+const ParlayPage = ({ parlayLines, removeFromParlay }) => {
   const organizeLinesByFirstBook = () => {
     const linesByFirstBook = {};
     parlayLines.forEach(line => {
@@ -24,7 +24,7 @@ const ParlayPage = ({ parlayLines }) => {
       .filter(line => line.book !== primaryBook)
       .map((line, index) => (
         <div key={index}>
-          {line.book}: {line.value}: {line.over}/{line.under}
+          {line.book}: Over - {line.over}, Under - {line.under}
         </div>
       ));
   };
@@ -47,25 +47,44 @@ const ParlayPage = ({ parlayLines }) => {
                     <th>League</th>
                     <th>Attribute</th>
                     <th>Game</th>
+                    <th>Expected Value</th>
+                    <th>Over/Under</th>
+                    <th>Hit Odds</th>
                     <th>Primary Book Line</th>
                     <th>Other Book Lines</th>
+                    <th>Remove</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {lines.map((line, index) => (
-                    <tr key={index}>
-                      <td>{line.player}</td>
-                      <td>{line.league}</td>
-                      <td>{line.attribute}</td>
-                      <td>{line.game}</td>
-                      <td>
-                        {line.lines.find(bookLine => bookLine.book === bookName)?.value}
-                      </td>
-                      <td>
-                        {renderOtherBookLines(line.lines, bookName)}
-                      </td>
-                    </tr>
-                  ))}
+                  {lines.map((line, index) => {
+                    const primaryBookLine = line.lines.find(bookLine => bookLine.book === bookName);
+                    return (
+                      <tr key={index}>
+                        <td>{line.player}</td>
+                        <td>{line.league}</td>
+                        <td>{line.attribute}</td>
+                        <td>{line.game}</td>
+                        <td>{primaryBookLine?.expectedValue}</td>
+                        <td>{primaryBookLine?.overOrUnder}</td>
+                        <td>{primaryBookLine?.hitOdds}</td>
+                        <td>
+                          {primaryBookLine?.value}
+                        </td>
+                        <td>
+                          {renderOtherBookLines(line.lines, bookName)}
+                        </td>
+                        <td>
+                        <button 
+                          onClick={() => removeFromParlay(line)} 
+                          className="btn btn-sm btn-danger" // Bootstrap classes for small, red buttons
+                          title="Remove from Parlay">
+                            <i className="bi bi-dash-circle"></i>X
+                        </button>
+                        </td>
+
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

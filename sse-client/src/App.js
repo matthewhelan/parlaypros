@@ -39,6 +39,30 @@ function App() {
       return prevLines;
     });
   };
+
+  const removeFromParlay = (lineToRemove) => {
+    setParlayLines(prevLines => {
+      const updatedLines = prevLines.filter(line => 
+        !(line.player === lineToRemove.player && line.game === lineToRemove.game && line.attribute === lineToRemove.attribute)
+      );
+  
+      // Send updatedLines to the server
+      fetch('http://localhost:5001/parlayLines', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ parlayLines: updatedLines }),
+      })
+      .then(response => response.text())
+      .then(data => console.log("Server response:", data))
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  
+      return updatedLines;
+    });
+  };
   
     
 
@@ -56,7 +80,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage addToParlay={addToParlay}/>} /> {/* Home route */}
-        <Route path="/parlay" element={<ParlayPage parlayLines={parlayLines} />} /> {/* New page route */}
+        <Route path="/parlay" element={<ParlayPage parlayLines={parlayLines} removeFromParlay={removeFromParlay} />} />
         {/* Add other routes as needed */}
       </Routes>
     </Router>
