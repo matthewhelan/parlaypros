@@ -316,25 +316,17 @@ function HomePage( { addToParlay }) {
       </select>
       </div>
 
-      <label htmlFor="showAdvanced" className='form-check-label'>Show Advanced Info:      </label>
 
-      <div className='form-check'>
+      <label htmlFor="showAdvanced" className='form-check-label'>Show Advanced Info&ensp;</label>
       <input
         type="checkbox" className="form-check-input"
         checked={showAdvanced} id="showAdvanced"
         onChange={() => setShowAdvanced(!showAdvanced)}
       />
-      <fieldset>
-        <legend>Filters</legend>
 
-        <div>
+      <br></br>
+          <label for="onlyOneBookFilter">Show lines with one book&ensp;</label>
           <input type="checkbox" id="onlyOneBookFilter" name="onlyOneBookFilter" onChange={applyOnlyOneBookFilter} />
-          <label for="onlyOneBookFilter">Show lines with one book</label>
-        </div>
-
-      </fieldset>
-
-    </div>
 
     </div>
     <div className='container-fluid'>
